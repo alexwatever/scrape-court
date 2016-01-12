@@ -1,7 +1,17 @@
 # import python libraries
 import mechanize
 import cookielib
+import csv
 from bs4 import BeautifulSoup
+
+
+
+# create csv to write data to
+#data = csv.writer(open("data.csv", "w"))
+
+# writer header row to csv
+#data.writerow(["url", "casenumber", "plaintiff", "defendant", "courtroom", "time", "calltype"])
+
 
 # setup mechanize browser
 br = mechanize.Browser()
@@ -23,23 +33,64 @@ br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 # setup user-agent to seem like a human
 br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
 
+
 # open website
 br.open('http://www.cookcountyclerkofcourt.org/?section=CASEINFOPage&CASEINFOPage=2500')
 
-# select form
-br.select_form('Criteria')
 
-# fill form fields
-br.form['Year'] = '1997'
-br.form['div'] = 'M1'
-br.form['number'] = '155682'
+# create number for logging lines
+num = 1
 
-# submit form
-br.submit()
+# create empty dictionary
+mydict = {}
 
-# store response
-response = br.response()
+# loop through list storing as lists
+with open("list.csv", mode="r") as f:
+    reader = csv.reader(f)
+    for row in reader:
+        print row[0], row[1], row[2]
 
-# print response
-print response.read()
+        # select form
+        br.select_form('Criteria')
+
+        # fill form fields
+        br.form['Year'] = row[0]
+        br.form['div'] = row[1]
+        br.form['number'] = row[2]
+
+        # submit form
+        br.submit()
+
+        data = br.response().read()
+
+        # store response in beautifulsoup
+        soup = BeautifulSoup(data, "lxml")
+
+        print soup
+        num += 1
+        print 'Line %d complete' % num
+
+"""# loop through list and saving data
+for i in info:
+    # select form
+    br.select_form('Criteria')
+
+    # fill form fields
+    br.form['Year'] = '1997'
+    br.form['div'] = 'M1'
+    br.form['number'] = '155682'
+
+    # submit form
+    br.submit()
+
+    # store response in beautifulsoup
+    soup = BeautifulSoup(br.response().read(), "lxml")
+
+    print i
+    print 'Line %d complete' % num
+    num += 1"""
+
+
+# print results
+print 'All done'
 
